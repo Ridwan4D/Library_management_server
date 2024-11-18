@@ -2,10 +2,14 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8000;
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+  })
+);
 
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@cluster0.yyjvuyt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -22,11 +26,14 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
 
     const bookCollection = client
       .db("rtLibraryManagementSystem")
-      .collection("books");
+      .collection("allBooks");
+    const categoryCollection = client
+      .db("rtLibraryManagementSystem")
+      .collection("categories");
 
     // ========================================   books collection start    ========================================
     app.get("/books", async (req, res) => {
@@ -42,6 +49,20 @@ async function run() {
 
     // ========================================   books collection end    ========================================
 
+    // ========================================   category collection start    ========================================
+    app.get("/categories", async (req, res) => {
+      const result = await categoryCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/categories", async (req, res) => {
+      const bookInfo = req.body;
+      const result = await categoryCollection.insertOne(bookInfo);
+      res.send(result);
+    });
+
+    // ========================================   category collection end    ========================================
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -49,7 +70,7 @@ async function run() {
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
