@@ -27,7 +27,10 @@ async function run() {
     const bookCollection = client.db("rtLibraryManagementSystem").collection("books");
 
     // ========================================   books collection start    ========================================
-    
+    app.get('/books', async (req, res) => {
+      const result = await bookCollection.find().toArray();
+      res.send(result);
+    })
     
     // ========================================   books collection end    ========================================
 
