@@ -60,7 +60,6 @@ async function run() {
       const result = await categoryCollection.insertOne(bookInfo);
       res.send(result);
     });
-
     // ========================================   category collection end    ========================================
 
     // Send a ping to confirm a successful connection
