@@ -24,32 +24,23 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const bookCollection = client.db("rtLibraryManagementSystem").collection("books");
+    const bookCollection = client
+      .db("rtLibraryManagementSystem")
+      .collection("books");
 
     // ========================================   books collection start    ========================================
-    app.get('/books', async (req, res) => {
+    app.get("/books", async (req, res) => {
       const result = await bookCollection.find().toArray();
       res.send(result);
-    })
-    
+    });
+
+    app.post("/books", async (req, res) => {
+      const bookInfo = req.body;
+      const result = await bookCollection.insertOne(bookInfo);
+      res.send(result);
+    });
+
     // ========================================   books collection end    ========================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
