@@ -73,6 +73,19 @@ async function run() {
       );
       res.send(result);
     });
+    
+    app.patch("/books/:id", async (req, res) => {
+      const id = req.params.id;
+      const quantityInfo = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateBook = {
+        $set: {
+          quantity: quantityInfo,
+        },
+      };
+      const result = await bookCollection.updateOne(filter, updateBook);
+      res.send(result);
+    });
     // ========================================   books collection end    ========================================
 
     // ========================================   category collection start    ========================================
@@ -94,8 +107,8 @@ async function run() {
       res.send(result);
     });
     app.post("/borrowBooks", async (req, res) => {
-      const bookInfo = req.body;
-      const result = await borrowBookCollection.insertOne(bookInfo);
+      const borrowInfo = req.body;
+      const result = await borrowBookCollection.insertOne(borrowInfo);
       res.send(result);
     });
     // ========================================   borrow collection end    ========================================
