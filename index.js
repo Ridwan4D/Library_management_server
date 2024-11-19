@@ -89,7 +89,10 @@ async function run() {
     // ========================================   category collection end    ========================================
 
     // ========================================   borrow collection start    ========================================
-    
+    app.get("/borrowBooks", async (req, res) => {
+      const result = await borrowBookCollection.find().toArray();
+      res.send(result);
+    });
 
     // ========================================   borrow collection end    ========================================
 
