@@ -34,6 +34,9 @@ async function run() {
     const categoryCollection = client
       .db("rtLibraryManagementSystem")
       .collection("categories");
+    const borrowBookCollection = client
+      .db("rtLibraryManagementSystem")
+      .collection("borrowBooks");
 
     // ========================================   books collection start    ========================================
     app.get("/books", async (req, res) => {
@@ -84,6 +87,11 @@ async function run() {
       res.send(result);
     });
     // ========================================   category collection end    ========================================
+
+    // ========================================   borrow collection start    ========================================
+    
+
+    // ========================================   borrow collection end    ========================================
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
