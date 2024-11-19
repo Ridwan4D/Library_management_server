@@ -93,7 +93,11 @@ async function run() {
       const result = await borrowBookCollection.find().toArray();
       res.send(result);
     });
-
+    app.post("/borrowBooks", async (req, res) => {
+      const bookInfo = req.body;
+      const result = await borrowBookCollection.insertOne(bookInfo);
+      res.send(result);
+    });
     // ========================================   borrow collection end    ========================================
 
     // Send a ping to confirm a successful connection
