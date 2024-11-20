@@ -32,17 +32,18 @@ const client = new MongoClient(uri, {
   },
 });
 
+
 const verifyToken = (req, res, next) => {
-  // console.log("inside verify token", req.headers);
-  if (!req.headers.authorization) {
+  const token = req?.cookies?.token;
+  // console.log("Token in middleware:", token);
+  if (!token) {
     return res.status(401).send({ message: "unauthorized access" });
   }
-  const token = req.headers.authorization.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+    if (error) {
       return res.status(401).send({ message: "unauthorized access" });
     }
-    req.decoded = decoded;
+    req.user = decoded;
     next();
   });
 };
@@ -50,7 +51,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
 
     const bookCollection = client
       .db("rtLibraryManagementSystem")
@@ -61,6 +62,9 @@ async function run() {
     const borrowBookCollection = client
       .db("rtLibraryManagementSystem")
       .collection("borrowBooks");
+    const reviewCollection = client
+      .db("rtLibraryManagementSystem")
+      .collection("reviews");
 
     // ========================================   jwt api collection start    ========================================
     app.post("/jwt", async (req, res) => {
@@ -86,7 +90,7 @@ async function run() {
     // ========================================   jwt api collection end    ========================================
 
     // ========================================   books collection start    ========================================
-    app.get("/books", verifyToken, async (req, res) => {
+    app.get("/books", async (req, res) => {
       const result = await bookCollection.find().toArray();
       res.send(result);
     });
@@ -170,8 +174,17 @@ async function run() {
     });
     // ========================================   borrow collection end    ========================================
 
+    // ========================================   review collection start    ========================================
+
+
+    // ========================================   review collection end    ========================================
+
+
+
+
+
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
