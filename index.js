@@ -32,7 +32,6 @@ const client = new MongoClient(uri, {
   },
 });
 
-
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
   // console.log("Token in middleware:", token);
@@ -175,13 +174,12 @@ async function run() {
     // ========================================   borrow collection end    ========================================
 
     // ========================================   review collection start    ========================================
-
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result);
+    });
 
     // ========================================   review collection end    ========================================
-
-
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
