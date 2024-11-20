@@ -9,7 +9,12 @@ const port = process.env.PORT || 8000;
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://library-management-site.web.app",
+      "https://library-management-site.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -27,22 +32,17 @@ const client = new MongoClient(uri, {
   },
 });
 
-const logger = (req, res, next) => {
-  console.log("log info:", req.method, req.url);
-  next();
-};
-
 const verifyToken = (req, res, next) => {
-  const token = req?.cookies?.token;
-  // console.log("Token in middleware:", token);
-  if (!token) {
+  // console.log("inside verify token", req.headers);
+  if (!req.headers.authorization) {
     return res.status(401).send({ message: "unauthorized access" });
   }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
-    if (error) {
+  const token = req.headers.authorization.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
       return res.status(401).send({ message: "unauthorized access" });
     }
-    req.user = decoded;
+    req.decoded = decoded;
     next();
   });
 };
@@ -50,7 +50,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const bookCollection = client
       .db("rtLibraryManagementSystem")
@@ -67,7 +67,7 @@ async function run() {
       const user = req.body;
       // console.log(user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1h"
+        expiresIn: "1h",
       });
       res
         .cookie("token", token, {
@@ -86,7 +86,7 @@ async function run() {
     // ========================================   jwt api collection end    ========================================
 
     // ========================================   books collection start    ========================================
-    app.get("/books", async (req, res) => {
+    app.get("/books", verifyToken, async (req, res) => {
       const result = await bookCollection.find().toArray();
       res.send(result);
     });
@@ -149,10 +149,10 @@ async function run() {
     // ========================================   category collection end    ========================================
 
     // ========================================   borrow collection start    ========================================
-    app.get("/borrowBooks", logger, verifyToken, async (req, res) => {
-      console.log("token owner info:", req.user);
+    app.get("/borrowBooks", verifyToken, async (req, res) => {
+      // console.log("token owner info:", req.user);
       if (req?.user?.email === req.query.email) {
-        return res.status(403).send({ message: "forbidden access"});
+        return res.status(403).send({ message: "forbidden access" });
       }
       const result = await borrowBookCollection.find().toArray();
       res.send(result);
@@ -171,7 +171,7 @@ async function run() {
     // ========================================   borrow collection end    ========================================
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
