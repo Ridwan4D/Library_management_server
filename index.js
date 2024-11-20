@@ -179,6 +179,12 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/reviews", async (req, res) => {
+      const reviewInfo = req.body;
+      const result = reviewCollection.insertOne(reviewInfo);
+      res.send(result);
+    });
+
     // ========================================   review collection end    ========================================
 
     // Send a ping to confirm a successful connection
